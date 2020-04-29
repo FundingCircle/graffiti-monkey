@@ -72,7 +72,10 @@ class GraffitiMonkey(object):
         log.info("Options: dryrun %s, append %s, novolumes %s, nosnapshots %s", self._dryrun, self._append, self._novolumes, self._nosnapshots)
         log.info("Connecting to region %s using profile %s", self._region, self._profile)
         try:
-            session = boto3.Session(profile_name=profile)
+            if profile is None:
+                session = boto3.Session()
+            else:
+                session = boto3.Session(profile_name=profile)
             self._conn = session.client('ec2', region_name=self._region)
         except botocore.exceptions.ProfileNotFound:
             raise GraffitiMonkeyException('No AWS credentials found - check your credentials')
