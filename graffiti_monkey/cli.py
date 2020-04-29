@@ -20,7 +20,7 @@ from graffiti_monkey.core import GraffitiMonkey, Logging
 from graffiti_monkey import __version__
 from graffiti_monkey.exceptions import GraffitiMonkeyException
 
-from boto.utils import get_instance_metadata
+from ec2_metadata import ec2_metadata
 
 
 __all__ = ('run', )
@@ -119,12 +119,10 @@ class GraffitiMonkeyCli(object):
             # If no region was specified, assume this is running on an EC2 instance
             # and work out what region it is in
             log.debug("Figure out which region I am running in...")
-            instance_metadata = get_instance_metadata(timeout=5)
-            log.debug('Instance meta-data: %s', instance_metadata)
-            if not instance_metadata:
+            try:
+                self.region = ec2_metadata.region
+            except:
                 GraffitiMonkeyCli._fail('Could not determine region. This script is either not running on an EC2 instance (in which case you should use the --region option), or the meta-data service is down')
-
-            self.region = instance_metadata['placement']['availability-zone'][:-1]
         log.debug("Running in region: %s", self.region)
 
     def set_profile(self):
